@@ -8,26 +8,47 @@ export interface IColumn extends Document {
   updatedAt: Date;
 }
 
-const columnSchema = new Schema<IColumn>({
-  name: {
-    type: String,
-    required: true,
-    trim: true
+const columnSchema = new Schema<IColumn>(
+  {
+    name: {
+      type: String,
+      required: [true, 'El nombre de la columna es requerido'],
+      trim: true,
+      maxlength: [50, 'El nombre no puede exceder 50 caracteres']
+    },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Project',
+      required: [true, 'El ID del proyecto es requerido'],
+      index: true
+    },
+    order: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: [0, 'El orden no puede ser negativo']
+    }
   },
-  projectId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Project',
-    required: true
-  },
-  order: {
-    type: Number,
-    required: true,
-    default: 0
+  {
+    timestamps: true,
+    versionKey: false
   }
-}, {
-  timestamps: true
-});
+);
 
+// Índice compuesto para mejorar consultas
 columnSchema.index({ projectId: 1, order: 1 });
 
-export default mongoose.model<IColumn>('Column', columnSchema);
+// Middleware para eliminar tareas asociadas al eliminar una columna
+columnSchema.pre('findOneAndDelete', async function(next) {
+  try {
+    const columnId = this.getQuery()._id;
+    await mongoose.model('Task').deleteMany({ columnId });
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+const Column = mongoose.model<IColumn>('Column', columnSchema);
+
+export default Column;
