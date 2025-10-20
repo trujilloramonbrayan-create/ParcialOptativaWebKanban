@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/authMiddleware';
 import Column from '../models/Column';
 import Project from '../models/Project';
-import Task from '../models/Task';
 
 // Crear columna
-export const createColumn = async (req: Request, res: Response) => {
+export const createColumn = async (req: AuthRequest, res: Response) => {
   try {
     const { name, projectId } = req.body;
 
@@ -17,7 +17,7 @@ export const createColumn = async (req: Request, res: Response) => {
       });
     }
 
-    if (project.userId.toString() !== req.user.id) {
+    if (project.userId.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para crear columnas en este proyecto'
@@ -52,7 +52,7 @@ export const createColumn = async (req: Request, res: Response) => {
 };
 
 // Obtener columnas de un proyecto
-export const getColumnsByProject = async (req: Request, res: Response) => {
+export const getColumnsByProject = async (req: AuthRequest, res: Response) => {
   try {
     const { projectId } = req.params;
 
@@ -65,7 +65,7 @@ export const getColumnsByProject = async (req: Request, res: Response) => {
       });
     }
 
-    if (project.userId.toString() !== req.user.id) {
+    if (project.userId.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para ver este proyecto'
@@ -88,7 +88,7 @@ export const getColumnsByProject = async (req: Request, res: Response) => {
 };
 
 // Actualizar columna
-export const updateColumn = async (req: Request, res: Response) => {
+export const updateColumn = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -103,7 +103,7 @@ export const updateColumn = async (req: Request, res: Response) => {
 
     // Verificar que el proyecto pertenece al usuario
     const project = await Project.findById(column.projectId);
-    if (!project || project.userId.toString() !== req.user.id) {
+    if (!project || project.userId.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para editar esta columna'
@@ -128,7 +128,7 @@ export const updateColumn = async (req: Request, res: Response) => {
 };
 
 // Eliminar columna
-export const deleteColumn = async (req: Request, res: Response) => {
+export const deleteColumn = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -142,7 +142,7 @@ export const deleteColumn = async (req: Request, res: Response) => {
 
     // Verificar que el proyecto pertenece al usuario
     const project = await Project.findById(column.projectId);
-    if (!project || project.userId.toString() !== req.user.id) {
+    if (!project || project.userId.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para eliminar esta columna'
@@ -166,7 +166,7 @@ export const deleteColumn = async (req: Request, res: Response) => {
 };
 
 // Reordenar columnas
-export const reorderColumns = async (req: Request, res: Response) => {
+export const reorderColumns = async (req: AuthRequest, res: Response) => {
   try {
     const { projectId, columns } = req.body;
     // columns debe ser un array de { id, order }
@@ -180,7 +180,7 @@ export const reorderColumns = async (req: Request, res: Response) => {
       });
     }
 
-    if (project.userId.toString() !== req.user.id) {
+    if (project.userId.toString() !== req.userId) {
       return res.status(403).json({
         success: false,
         message: 'No tienes permiso para reordenar columnas en este proyecto'
