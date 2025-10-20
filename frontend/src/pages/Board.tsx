@@ -12,8 +12,9 @@ import {
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import type { Column, Task, Project } from '../types';
 import * as api from '../services/api';
-import ColumnComponent from '../components/Column';
-import TaskCard from '../components/TaskCard';
+import ColumnComponent from '../components/column';
+import  TaskCard  from '../components/TaskCard';
+
 
 export default function Board() {
   const { projectId } = useParams<{ projectId: string }>();
